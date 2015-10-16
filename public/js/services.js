@@ -14,7 +14,6 @@ angular.module('commentService', [])
 				'api/comments',
 				{
 					'parent_id'	: commentData.parent,
-					'author'	: commentData.author,
 					'title'		: commentData.title,
 					'text'		: commentData.text
 				}

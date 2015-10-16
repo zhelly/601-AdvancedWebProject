@@ -14,12 +14,10 @@ class UserTableSeeder extends Seeder
     {
         DB::table('users')->truncate();
 		
-		User::create(array(
-			'author' => 'Zelmira'
-		));
-		
-		User::create(array(
-			'author' => 'Zelmira2'
-		));
+		$user = new User;
+		$user->id = 123;
+		$user->username = 'Želmira Mikljan';
+		$user->email = 'zelmira.mikljan@gmail.com';
+		$user->save();
     }
 }

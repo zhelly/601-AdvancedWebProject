@@ -18,8 +18,8 @@ class CommentController extends Controller
      */
     public function index()
     {
-		$comments = Comment::all();
-		
+		//$comments = Comment::orderBy('created_at','desc')->get();
+		$comments = Comment::with('user')->orderBy('created_at','desc')->get();
 		$nested = $this->buildTree($comments->toArray());
 		
 		return response()->json($nested);
@@ -33,7 +33,7 @@ class CommentController extends Controller
     public function store(Request $request)
     {
 		$comment = new Comment;
-		$comment->author = $request->input('author');
+		$comment->user_id = session('user_id');
 		$comment->title = $request->input('title');
 		$comment->text = $request->input('text');
 		
@@ -41,16 +41,16 @@ class CommentController extends Controller
 		{
 			$comment->parent_id = $request->input('parent_id');
 		}
-		$comment->save();
 		
-		if(! User::where('author', $request->input('author'))->first())
+		if($comment->save())
 		{
-			$user = new User;
-			$user->author = $request->input('author');
-			$user->save();
+			return response()->json(['success' => true]);
+		}
+		else
+		{
+			return response()->json(['success' => false]);
 		}
 		
-		return response()->json(['success' => true]);
     }
 
     /**
@@ -61,34 +61,96 @@ class CommentController extends Controller
      */
     public function destroy($id)
     {
-		$comment = Comment::find($id);
-        
-		Comment::destroy($id);
-		
-		if( Comment::where('author',$comment->author)->count() < 1 )
+		// if has child comment, cannot delete
+		if(Comment::where('parent_id', $id)->count() > 0)
 		{
-			User::where('author',$comment->author)->delete();
+			return response()->json([
+				'code' => 500,
+				'status' => 'Error',
+				'message' => 'Cannot delete the post.'
+			]);
 		}
-		return response()->json(['success' => true]);
+		else
+		{
+			$comment = Comment::find($id);
+			
+			Comment::destroy($id);
+			
+			return response()->json([
+				'code' => 200,
+				'status' => 'Success'
+			]);
+		}
     }
 	
 	public function postVoteUp(Request $request)
 	{
-		$user = User::where('author',$request->input('author'))->first();
-		$user->vote = $user->vote + 1;
-		$user->save();
+		if(\App\Vote::where('user_id', $request->input('user_id'))->where('comment_id', $request->input('comment_id'))->count() > 0)
+		{
+			return response()->json([
+				'code' => 500,
+				'status' => 'Error',
+				'message' => 'You have voted this!'
+			]);
+		}
+		else
+		{
+			$user = User::find($request->input('user_id'));
+			$user->vote = $user->vote + 1;
+			$user->save();
+			
+			;
+			\App\Vote::create([
+				'user_id' 		=> $request->input('user_id'),
+				'comment_id'	=> $request->input('comment_id'),
+			]);
+			
+			return response()->json([
+				'code' => 200,
+				'status' => 'Success',
+				'message' => 'Thanks for voting up!'
+			]);
+		}
 	}
 	
 	public function postVoteDown(Request $request)
 	{
-		$user = User::where('author',$request->input('author'))->first();
-		$user->vote = $user->vote - 1;
-		$user->save();
+		if(\App\Vote::where('user_id', $request->input('user_id'))->where('comment_id', $request->input('comment_id'))->count() > 0)
+		{
+			return response()->json([
+				'code' => 500,
+				'status' => 'Error',
+				'message' => 'You have voted this!'
+			]);
+		}
+		else
+		{
+			$user = User::find($request->input('user_id'));
+			$user->vote = $user->vote - 1;
+			if($user->vote < 0)
+			{
+				$user->vote = 0;
+			}
+			$user->save();
+			
+			;
+			\App\Vote::create([
+				'user_id' 		=> $request->input('user_id'),
+				'comment_id'	=> $request->input('comment_id'),
+			]);
+			
+			return response()->json([
+				'code' => 200,
+				'status' => 'Success',
+				'message' => 'Thanks for voting down!'
+			]);
+		}
+		
 	}
 	
 	public function getLeaderboard()
 	{
-		$users = User::orderBy('vote','desc')->get();
+		$users = User::orderBy('vote','desc')->orderBy('username')->get();
 		return view('leaderboard', ['users' => $users]);
 	}
 	

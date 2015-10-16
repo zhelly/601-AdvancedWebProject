@@ -15,13 +15,13 @@ class CommentTableSeeder extends Seeder
         DB::table('comments')->truncate();
 		
 		Comment::create(array(
-			'author' => 'Zelmira',
+			'user_id' => 123,
 			'title'	=> 'Laravel',
 			'text' => 'I know laravel.'
 		));
     
 		Comment::create(array(
-			'author' => 'Zelmira2',
+			'user_id' => 123,
 			'title'	=> 'Angular',
 			'text' => 'agnular is cool.'
 		));

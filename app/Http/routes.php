@@ -11,9 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('index');
-});
+Route::any('/', 'UsersController@index');
 
 Route::group(array('prefix' => 'api'), function() {
 
@@ -24,3 +22,10 @@ Route::group(array('prefix' => 'api'), function() {
 Route::post('vote-up', 'CommentController@postVoteUp');
 Route::post('vote-down', 'CommentController@postVoteDown');
 Route::get('leaderboard', 'CommentController@getLeaderboard');
+
+Route::get('dummy', function (){
+	session([
+		'user_id' => 123,
+	]);
+	return redirect('/');
+});

@@ -3,8 +3,8 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Ask a question</title>
-		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
-		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
 		<link rel="stylesheet" href="{{ url() }}/css/main.css"> 
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 		
@@ -36,7 +36,15 @@
 				@foreach($users as $index => $user)
 					<tr>
 						<td>{{ ++$index }}</td>
-						<td>{{ $user->author }}</td>
+						<td>{{ $user->username }}
+						@if($index == 1)
+							<img src="{{ url('images/first.jpg') }}" style="width:20px;height:20px">
+						@elseif($index == 2)
+							<img src="{{ url('images/second.jpg') }}" style="width:20px;height:20px">
+						@elseif($index == 3)
+							<img src="{{ url('images/third.jpg') }}" style="width:20px;height:20px">
+						@endif
+						</td>
 						<td>{{ $user->vote }}</td>
 					</tr>
 				@endforeach

@@ -4,11 +4,15 @@
     </IfModule>
 
     RewriteEngine On
+	
+	# disable hotlink protection
+	RewriteRule ^.*$ -
 
-    # Redirect Trailing Slashes...
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)/$ /$1 [L,R=301]
 
-    # Handle Front Controller...
+    # Handle Front Controler...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]

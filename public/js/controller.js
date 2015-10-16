@@ -12,6 +12,9 @@ angular.module('mainCtrl', [])
     // loading variable to show the spinning loading icon
     $scope.loading = true;
 	
+	$scope.showModal = false;
+	$scope.showModalContent = '';
+	
 	// get all the comments first and bind it to the $scope.comments object
     // use the function we created in our service
     // GET ALL COMMENTS ==============
@@ -37,7 +40,6 @@ angular.module('mainCtrl', [])
                         $scope.comments = getData;
                         $scope.loading = false;
                     });
-				$scope.commentData.author = '';
 				$scope.commentData.title = '';
 				$scope.commentData.text = '';
             })
@@ -53,8 +55,14 @@ angular.module('mainCtrl', [])
 
         // use the function we created in our service
         Comment.destroy(id)
-            .success(function(data) {
+            .success(function(data, status) {
 
+				if(data.code !== 200)
+				{
+					$scope.showModal = true;
+					$scope.showModalContent = data;
+				}
+				
                 // if successful, we'll need to refresh the comment list
                 Comment.get()
                     .success(function(getData) {
@@ -67,16 +75,41 @@ angular.module('mainCtrl', [])
 	
 	$scope.voteUpComment = function(comment)
 	{
-		$http.post('vote-up', {'author':comment.author}).success(function(data){
-		 alert('Succesfully voted up!');
+		$http.post('vote-up', {'user_id':comment.user_id, 'comment_id':comment.id}).success(function(data){
+			
+			$scope.showModal = true;
+			$scope.showModalContent = data;
+				
+			Comment.get()
+			.success(function(data) {
+				$scope.comments = data;
+				$scope.loading = false;			
+			});
+			
+			if(data.code === 200){
+				window.setTimeout(function(){location.reload()},3000);
+			}
 		});
+		
 	}
 	
 	$scope.voteDownComment = function(comment)
 	{
-		$http.post('vote-down', {'author':comment.author}).success(function(data){
-		 alert('Succesfully voted down!');
+		$http.post('vote-down', {'user_id':comment.user_id, 'comment_id':comment.id }).success(function(data){
+			$scope.showModal = true;
+			$scope.showModalContent = data;
+				
+			Comment.get()
+			.success(function(data) {
+				$scope.comments = data;
+				$scope.loading = false;			
+			});
+			
+			if(data.code === 200){
+				window.setTimeout(function(){location.reload()},3000);
+			}
 		});
+		
 	}
 	
 	this.showReply = function(comment) {
@@ -106,11 +139,9 @@ angular.module('mainCtrl', [])
             .error(function(data) {
                 console.log(data);
             });
-		this.replyComment.author = '';
 		this.replyComment.title = '';
 		this.replyComment.text = '';
 		comment.showReply = false;
 	}
 	
 });
-
